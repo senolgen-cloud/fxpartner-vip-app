@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+@layer utilities {
+  .bg-glass {
+    background: rgba(13, 17, 28, 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  
+  .bg-glass-premium {
+    background: linear-gradient(135deg, rgba(20, 25, 40, 0.85) 0%, rgba(10, 14, 23, 0.95) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(192, 203, 220, 0.15);
+  }
+  
+  .bg-glass-gold {
+    background: linear-gradient(135deg, rgba(30, 25, 15, 0.85) 0%, rgba(15, 12, 8, 0.95) 100%);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+  }
+
+  .text-metallic {
+    background: linear-gradient(135deg, #ffffff 0%, #a2b4cc 50%, #64748b 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .text-gold {
+    background: linear-gradient(135deg, #fce881 0%, #c5a059 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .glow-blue {
+    box-shadow: 0 0 25px -5px rgba(59, 130, 246, 0.4);
+  }
+
+  .glow-green {
+    box-shadow: 0 0 20px -3px rgba(16, 185, 129, 0.35);
+  }
+
+  .glow-red {
+    box-shadow: 0 0 20px -3px rgba(239, 68, 68, 0.35);
+  }
+  
+  .glow-gold {
+    box-shadow: 0 0 25px -3px rgba(212, 175, 55, 0.3);
+  }
+}
+
+body {
+  background-color: #060911;
+  color: #f1f5f9;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #090d16;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.02); }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s infinite ease-in-out;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.animate-float {
+  animation: float 4s infinite ease-in-out;
+}
+
+/* Terminal scanline effect option */
+.scanline {
+  background: linear-gradient(
+    to bottom,
+    rgba(255,255,255,0),
+    rgba(255,255,255,0) 50%,
+    rgba(0, 0, 0, 0.3) 50%,
+    rgba(0, 0, 0, 0.3)
+  );
+  background-size: 100% 4px;
+}
