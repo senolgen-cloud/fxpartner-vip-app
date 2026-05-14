@@ -44,22 +44,41 @@ export default function App() {
         const liveSignals = snapshot.docs.map((doc) => {
           const data: any = doc.data();
 
+          const rawStatus = String(data.status || 'ACTIVE');
+          const normalizedStatus = rawStatus.trim().toUpperCase();
+
+          const rawDirection = String(data.type || data.direction || 'BUY');
+          const normalizedDirection = rawDirection.trim().toUpperCase();
+
           return {
             id: doc.id,
+
             symbol: String(data.pair || data.symbol || 'XAUUSD'),
-            direction: String(data.type || data.direction || 'BUY').toUpperCase(),
+            direction: normalizedDirection === 'SELL' ? 'SELL' : 'BUY',
+
             entry: Number(data.entry || 0),
             sl: Number(data.sl || 0),
             tp: Number(data.tp || 0),
-            status: String(data.status || 'ACTIVE').toUpperCase(),
+
+            status:
+              normalizedStatus === 'CLOSED'
+                ? 'CLOSED'
+                : normalizedStatus === 'PENDING'
+                  ? 'PENDING'
+                  : 'ACTIVE',
+
             broker: String(data.broker || 'FXPARTNER'),
             timeframe: String(data.timeframe || 'H1'),
+
             confidence: Number(data.confidence || 90),
             pips: Number(data.pips || 0),
+
             rrRatio: String(data.rrRatio || data.riskReward || '1:2.4'),
             riskReward: String(data.riskReward || data.rrRatio || '1:2.4'),
+
             timestamp: String(data.timestamp || data.openedAt || 'Live'),
             openedAt: String(data.openedAt || data.timestamp || 'Live'),
+
             brokerLogo: data.brokerLogo || '⚡'
           } as ForexSignal;
         });
@@ -81,7 +100,7 @@ export default function App() {
     const interval = setInterval(() => {
       setSignals((prevSignals) =>
         prevSignals.map((sig) => {
-          if (sig.status !== 'ACTIVE') return sig;
+          if (String(sig.status).toUpperCase() !== 'ACTIVE') return sig;
 
           const pipDelta = Math.floor(Math.random() * 5) - 2;
           const newPips = Number(sig.pips || 0) + pipDelta;
@@ -97,15 +116,21 @@ export default function App() {
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const handleAddSignal = (newSignal: ForexSignal) => {
-    setSignals((prev) => [newSignal, ...prev]);
+    const normalizedSignal = {
+      ...newSignal,
+      status: String(newSignal.status || 'ACTIVE').toUpperCase(),
+      direction: String(newSignal.direction || 'BUY').toUpperCase()
+    } as ForexSignal;
+
+    setSignals((prev) => [normalizedSignal, ...prev]);
 
     const newAlert: TradeAlert = {
       id: `notif-${Date.now()}`,
-      title: `⚡ NEW VIP SIGNAL: ${newSignal.symbol}`,
-      message: `${newSignal.direction} ${newSignal.symbol} @ ${newSignal.entry}. SL: ${newSignal.sl} | TP: ${newSignal.tp}. Encrypted institutional order block broadcast.`,
+      title: `⚡ NEW VIP SIGNAL: ${normalizedSignal.symbol}`,
+      message: `${normalizedSignal.direction} ${normalizedSignal.symbol} @ ${normalizedSignal.entry}. SL: ${normalizedSignal.sl} | TP: ${normalizedSignal.tp}. Encrypted institutional order block broadcast.`,
       type: 'ALERT',
       time: 'Just now',
-      symbol: newSignal.symbol,
+      symbol: normalizedSignal.symbol,
       read: false
     };
 
@@ -117,7 +142,9 @@ export default function App() {
     setSignals((prev) =>
       prev.map((sig) => {
         if (sig.id === id) {
-          const nextStatus = sig.status === 'ACTIVE' ? 'CLOSED' : 'ACTIVE';
+          const currentStatus = String(sig.status || 'ACTIVE').toUpperCase();
+          const nextStatus = currentStatus === 'ACTIVE' ? 'CLOSED' : 'ACTIVE';
+
           return { ...sig, status: nextStatus };
         }
 
