@@ -1,5 +1,12 @@
 import { useState, useEffect } from 'react';
-import { INITIAL_SIGNALS, INITIAL_NOTIFICATIONS, ForexSignal, TradeAlert } from './data/initialSignals';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from './firebase';
+
+import {
+  INITIAL_NOTIFICATIONS,
+  ForexSignal,
+  TradeAlert
+} from './data/initialSignals';
 
 // Screens & Components
 import { SplashScreen } from './components/SplashScreen';
@@ -20,17 +27,46 @@ export default function App() {
   const [showSplash, setShowSplash] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
-  
-  // Navigation / Modals state
+
   const [selectedSignal, setSelectedSignal] = useState<ForexSignal | null>(null);
   const [showNotifications, setShowNotifications] = useState(false);
 
-  // App Data State
-  const [signals, setSignals] = useState<ForexSignal[]>(INITIAL_SIGNALS);
+  const [signals, setSignals] = useState<ForexSignal[]>([]);
   const [notifications, setNotifications] = useState<TradeAlert[]>(INITIAL_NOTIFICATIONS);
   const [toast, setToast] = useState<TradeAlert | null>(null);
 
-  // Auto-simulate market pips ticking every 8 seconds
+  // Firebase Firestore canlı sinyal bağlantısı
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const unsubscribe = onSnapshot(collection(db, 'signals'), (snapshot) => {
+      const liveSignals = snapshot.docs.map((doc) => {
+        const data = doc.data();
+
+        return {
+          id: doc.id,
+          symbol: data.pair || data.symbol || 'XAUUSD',
+          direction: data.type || data.direction || 'BUY',
+          entry: data.entry || 0,
+          sl: data.sl || 0,
+          tp: data.tp || 0,
+          status: (data.status || 'ACTIVE').toUpperCase(),
+          broker: data.broker || 'FXPARTNER',
+          timeframe: data.timeframe || 'H1',
+          confidence: data.confidence || 90,
+          pips: data.pips || 0,
+          riskReward: data.riskReward || '1:2.4',
+          openedAt: data.openedAt || 'Live'
+        } as ForexSignal;
+      });
+
+      setSignals(liveSignals);
+    });
+
+    return () => unsubscribe();
+  }, [isAuthenticated]);
+
+  // Pips simülasyonu
   useEffect(() => {
     if (!isAuthenticated) return;
 
@@ -38,8 +74,8 @@ export default function App() {
       setSignals((prevSignals) =>
         prevSignals.map((sig) => {
           if (sig.status !== 'ACTIVE') return sig;
-          const pipDelta = Math.floor(Math.random() * 5) - 2; // -2 to +2
-          const newPips = sig.pips + pipDelta;
+          const pipDelta = Math.floor(Math.random() * 5) - 2;
+          const newPips = (sig.pips || 0) + pipDelta;
           return { ...sig, pips: newPips };
         })
       );
@@ -53,7 +89,6 @@ export default function App() {
   const handleAddSignal = (newSignal: ForexSignal) => {
     setSignals((prev) => [newSignal, ...prev]);
 
-    // Dispatch simulated push notification
     const newAlert: TradeAlert = {
       id: `notif-${Date.now()}`,
       title: `⚡ NEW VIP SIGNAL: ${newSignal.symbol}`,
@@ -130,7 +165,6 @@ export default function App() {
     window.open('https://telegram.org', '_blank');
   };
 
-  // Toast auto-dismiss
   useEffect(() => {
     if (!toast) return;
     const timer = setTimeout(() => setToast(null), 5000);
@@ -147,7 +181,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#060911] text-slate-100 flex flex-col relative max-w-md mx-auto shadow-2xl border-x border-slate-900/80">
-      {/* Toast Notification Popup */}
       {toast && (
         <div className="fixed top-16 inset-x-4 z-50 max-w-sm mx-auto bg-slate-900/95 border-2 border-blue-500 rounded-2xl p-4 shadow-2xl glow-blue animate-float transition-all">
           <div className="flex justify-between items-start mb-1">
@@ -165,7 +198,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Top Navbar */}
       <Navbar
         unreadCount={unreadCount}
         onOpenNotifications={() => {
@@ -180,7 +212,6 @@ export default function App() {
         activeTab={showNotifications ? 'ALERTS' : selectedSignal ? 'DETAIL' : activeTab.toUpperCase()}
       />
 
-      {/* Main Content Viewport */}
       <main className="flex-1 overflow-y-auto">
         {showNotifications ? (
           <NotificationsScreen
@@ -216,7 +247,6 @@ export default function App() {
         ) : null}
       </main>
 
-      {/* Bottom Navigation Bar */}
       {!selectedSignal && !showNotifications && (
         <BottomNav
           activeTab={activeTab === 'profile' ? '' : activeTab}
