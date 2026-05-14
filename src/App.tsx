@@ -35,38 +35,46 @@ export default function App() {
   const [notifications, setNotifications] = useState<TradeAlert[]>(INITIAL_NOTIFICATIONS);
   const [toast, setToast] = useState<TradeAlert | null>(null);
 
-  // Firebase Firestore canlı sinyal bağlantısı
   useEffect(() => {
     if (!isAuthenticated) return;
 
-    const unsubscribe = onSnapshot(collection(db, 'signals'), (snapshot) => {
-      const liveSignals = snapshot.docs.map((doc) => {
-        const data = doc.data();
+    const unsubscribe = onSnapshot(
+      collection(db, 'signals'),
+      (snapshot) => {
+        const liveSignals = snapshot.docs.map((doc) => {
+          const data: any = doc.data();
 
-        return {
-          id: doc.id,
-          symbol: data.pair || data.symbol || 'XAUUSD',
-          direction: data.type || data.direction || 'BUY',
-          entry: data.entry || 0,
-          sl: data.sl || 0,
-          tp: data.tp || 0,
-          status: (data.status || 'ACTIVE').toUpperCase(),
-          broker: data.broker || 'FXPARTNER',
-          timeframe: data.timeframe || 'H1',
-          confidence: data.confidence || 90,
-          pips: data.pips || 0,
-          riskReward: data.riskReward || '1:2.4',
-          openedAt: data.openedAt || 'Live'
-        } as ForexSignal;
-      });
+          return {
+            id: doc.id,
+            symbol: String(data.pair || data.symbol || 'XAUUSD'),
+            direction: String(data.type || data.direction || 'BUY').toUpperCase(),
+            entry: Number(data.entry || 0),
+            sl: Number(data.sl || 0),
+            tp: Number(data.tp || 0),
+            status: String(data.status || 'ACTIVE').toUpperCase(),
+            broker: String(data.broker || 'FXPARTNER'),
+            timeframe: String(data.timeframe || 'H1'),
+            confidence: Number(data.confidence || 90),
+            pips: Number(data.pips || 0),
+            rrRatio: String(data.rrRatio || data.riskReward || '1:2.4'),
+            riskReward: String(data.riskReward || data.rrRatio || '1:2.4'),
+            timestamp: String(data.timestamp || data.openedAt || 'Live'),
+            openedAt: String(data.openedAt || data.timestamp || 'Live'),
+            brokerLogo: data.brokerLogo || '⚡'
+          } as ForexSignal;
+        });
 
-      setSignals(liveSignals);
-    });
+        setSignals(liveSignals);
+      },
+      (error) => {
+        console.error('Firestore signals error:', error);
+        setSignals([]);
+      }
+    );
 
     return () => unsubscribe();
   }, [isAuthenticated]);
 
-  // Pips simülasyonu
   useEffect(() => {
     if (!isAuthenticated) return;
 
@@ -74,8 +82,10 @@ export default function App() {
       setSignals((prevSignals) =>
         prevSignals.map((sig) => {
           if (sig.status !== 'ACTIVE') return sig;
+
           const pipDelta = Math.floor(Math.random() * 5) - 2;
-          const newPips = (sig.pips || 0) + pipDelta;
+          const newPips = Number(sig.pips || 0) + pipDelta;
+
           return { ...sig, pips: newPips };
         })
       );
@@ -110,6 +120,7 @@ export default function App() {
           const nextStatus = sig.status === 'ACTIVE' ? 'CLOSED' : 'ACTIVE';
           return { ...sig, status: nextStatus };
         }
+
         return sig;
       })
     );
@@ -126,16 +137,16 @@ export default function App() {
 
     if (type === 'TP') {
       title = `🟢 TP REACHED: ${randomPair}`;
-      message = `Take Profit target hit with flawless execution. Secure partial profits immediately.`;
+      message = 'Take Profit target hit with flawless execution. Secure partial profits immediately.';
     } else if (type === 'ALERT') {
       title = `⚡ NEW VIP SIGNAL: ${randomPair}`;
-      message = `Institutional order block triggered. Entry coordinates dispatched.`;
+      message = 'Institutional order block triggered. Entry coordinates dispatched.';
     } else if (type === 'PENDING') {
-      title = `⏳ PENDING ORDER ACTIVATED`;
+      title = '⏳ PENDING ORDER ACTIVATED';
       message = `Limit order for ${randomPair} triggered successfully.`;
     } else {
-      title = `💎 VIP ECONOMIC BRIEFING`;
-      message = `High volatility anticipated during upcoming London session open.`;
+      title = '💎 VIP ECONOMIC BRIEFING';
+      message = 'High volatility anticipated during upcoming London session open.';
     }
 
     const newAlert: TradeAlert = {
@@ -157,7 +168,9 @@ export default function App() {
   };
 
   const handleSelectPlan = (planName: string) => {
-    alert(`🎉 Congratulations! You have successfully upgraded to the ${planName} allocation. Your Telegram bot is now syncing with zero latency.`);
+    alert(
+      `🎉 Congratulations! You have successfully upgraded to the ${planName} allocation. Your Telegram bot is now syncing with zero latency.`
+    );
   };
 
   const handleOpenSupport = () => {
@@ -167,7 +180,9 @@ export default function App() {
 
   useEffect(() => {
     if (!toast) return;
+
     const timer = setTimeout(() => setToast(null), 5000);
+
     return () => clearTimeout(timer);
   }, [toast]);
 
@@ -188,10 +203,15 @@ export default function App() {
               <span className="w-2 h-2 rounded-full bg-blue-500 animate-ping"></span>
               <h4 className="font-extrabold text-sm text-white">{toast.title}</h4>
             </div>
-            <button onClick={() => setToast(null)} className="text-slate-400 hover:text-white p-0.5">
+
+            <button
+              onClick={() => setToast(null)}
+              className="text-slate-400 hover:text-white p-0.5"
+            >
               <X className="w-4 h-4" />
             </button>
           </div>
+
           <p className="text-xs text-slate-300 font-mono mt-1 leading-snug">
             {toast.message}
           </p>
@@ -209,7 +229,13 @@ export default function App() {
           setShowNotifications(false);
           setSelectedSignal(null);
         }}
-        activeTab={showNotifications ? 'ALERTS' : selectedSignal ? 'DETAIL' : activeTab.toUpperCase()}
+        activeTab={
+          showNotifications
+            ? 'ALERTS'
+            : selectedSignal
+              ? 'DETAIL'
+              : activeTab.toUpperCase()
+        }
       />
 
       <main className="flex-1 overflow-y-auto">
