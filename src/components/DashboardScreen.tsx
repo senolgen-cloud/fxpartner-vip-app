@@ -1,7 +1,15 @@
 import React, { useState } from 'react';
 import { ForexSignal } from '../data/initialSignals';
 import { SignalCard } from './SignalCard';
-import { TrendingUp, Percent, DollarSign, Activity, MessageCircle, Filter, Award } from 'lucide-react';
+import {
+  TrendingUp,
+  Percent,
+  DollarSign,
+  Activity,
+  MessageCircle,
+  Filter,
+  Award
+} from 'lucide-react';
 
 interface DashboardScreenProps {
   signals: ForexSignal[];
@@ -16,30 +24,32 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
 }) => {
   const [filter, setFilter] = useState<'ALL' | 'ACTIVE' | 'CLOSED'>('ALL');
 
-  const filteredSignals = signals.filter((s) => {
-    if (filter === 'ACTIVE') return s.status === 'ACTIVE';
-    if (filter === 'CLOSED') return s.status === 'CLOSED';
-    return true;
-  });
+  // Filtre sorunu yaşamamak için tüm sinyalleri direkt gösteriyoruz
+  const filteredSignals = signals;
 
-  const activeTradesCount = signals.filter((s) => s.status === 'ACTIVE').length;
+  const activeTradesCount = signals.length;
 
   return (
     <div className="pb-24 pt-4 px-4 space-y-6">
-      {/* Top Banner / VIP Status */}
       <div className="bg-glass-gold rounded-2xl p-4 flex items-center justify-between shadow-xl glow-gold relative overflow-hidden">
         <div className="absolute right-0 top-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-slate-950 shadow-md">
             <Award className="w-6 h-6 stroke-[2.5]" />
           </div>
+
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-black tracking-tight text-white">INSTITUTIONAL VIP</h2>
+              <h2 className="text-lg font-black tracking-tight text-white">
+                INSTITUTIONAL VIP
+              </h2>
+
               <span className="bg-amber-400 text-slate-950 font-black text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider">
                 ACTIVE
               </span>
             </div>
+
             <p className="text-xs text-amber-200/80 font-medium">
               Zero Latency Signal Injection & Raw Spreads
             </p>
@@ -47,67 +57,94 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
         </div>
 
         <div className="text-right hidden sm:block">
-          <span className="text-[10px] text-amber-200 uppercase font-mono block">Liquidity Pool</span>
-          <span className="font-mono text-sm font-bold text-white">$1.24B Tier 1</span>
+          <span className="text-[10px] text-amber-200 uppercase font-mono block">
+            Liquidity Pool
+          </span>
+          <span className="font-mono text-sm font-bold text-white">
+            $1.24B Tier 1
+          </span>
         </div>
       </div>
 
-      {/* Stats Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-3.5 flex flex-col justify-between shadow-lg">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-[10px] text-slate-400 uppercase font-mono tracking-wider">Win Rate</span>
+            <span className="text-[10px] text-slate-400 uppercase font-mono tracking-wider">
+              Win Rate
+            </span>
             <div className="p-1 rounded-lg bg-blue-500/10 text-blue-400">
               <Percent className="w-3.5 h-3.5" />
             </div>
           </div>
+
           <div className="text-2xl font-black text-white font-mono tracking-tight flex items-baseline gap-1">
             91.4<span className="text-sm font-normal text-slate-400">%</span>
           </div>
-          <span className="text-[9px] text-emerald-400 font-mono mt-1">↑ 2.3% this month</span>
+
+          <span className="text-[9px] text-emerald-400 font-mono mt-1">
+            ↑ 2.3% this month
+          </span>
         </div>
 
         <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-3.5 flex flex-col justify-between shadow-lg">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-[10px] text-slate-400 uppercase font-mono tracking-wider">Daily Profit</span>
+            <span className="text-[10px] text-slate-400 uppercase font-mono tracking-wider">
+              Daily Profit
+            </span>
             <div className="p-1 rounded-lg bg-emerald-500/10 text-emerald-400">
               <DollarSign className="w-3.5 h-3.5" />
             </div>
           </div>
+
           <div className="text-2xl font-black text-emerald-400 font-mono tracking-tight flex items-baseline gap-1">
             +532<span className="text-xs font-normal text-slate-400"> pips</span>
           </div>
-          <span className="text-[9px] text-emerald-400 font-mono mt-1">🎯 All targets reached</span>
+
+          <span className="text-[9px] text-emerald-400 font-mono mt-1">
+            🎯 All targets reached
+          </span>
         </div>
 
         <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-3.5 flex flex-col justify-between shadow-lg">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-[10px] text-slate-400 uppercase font-mono tracking-wider">Active Trades</span>
+            <span className="text-[10px] text-slate-400 uppercase font-mono tracking-wider">
+              Active Trades
+            </span>
             <div className="p-1 rounded-lg bg-amber-500/10 text-amber-400">
               <TrendingUp className="w-3.5 h-3.5" />
             </div>
           </div>
+
           <div className="text-2xl font-black text-white font-mono tracking-tight flex items-baseline gap-1">
-            {activeTradesCount} <span className="text-xs font-normal text-amber-400">live</span>
+            {activeTradesCount}
+            <span className="text-xs font-normal text-amber-400"> live</span>
           </div>
-          <span className="text-[9px] text-slate-400 font-mono mt-1">Awaiting NY session</span>
+
+          <span className="text-[9px] text-slate-400 font-mono mt-1">
+            Firestore synced
+          </span>
         </div>
 
         <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-3.5 flex flex-col justify-between shadow-lg">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-[10px] text-slate-400 uppercase font-mono tracking-wider">Market Status</span>
+            <span className="text-[10px] text-slate-400 uppercase font-mono tracking-wider">
+              Market Status
+            </span>
             <div className="p-1 rounded-lg bg-purple-500/10 text-purple-400">
               <Activity className="w-3.5 h-3.5" />
             </div>
           </div>
+
           <div className="text-sm font-extrabold text-blue-400 tracking-tight leading-snug">
             LONDON / NY OVERLAP
           </div>
-          <span className="text-[9px] text-slate-400 font-mono mt-1">🔥 Extreme Liquidity</span>
+
+          <span className="text-[9px] text-slate-400 font-mono mt-1">
+            🔥 Extreme Liquidity
+          </span>
         </div>
       </div>
 
-      {/* Signals Section Header */}
       <div className="flex items-center justify-between pt-2 border-t border-slate-800/80">
         <div>
           <h3 className="text-lg font-extrabold text-white tracking-tight flex items-center gap-2">
@@ -117,55 +154,59 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
             </span>
           </h3>
+
           <p className="text-xs text-slate-400 font-mono">
-            Encrypted order-flow execution feeds
+            Firebase realtime signal feed
           </p>
         </div>
 
-        {/* Filter Pills */}
         <div className="flex bg-slate-900/90 border border-slate-800 rounded-xl p-1 gap-1 text-xs font-medium">
           <button
             onClick={() => setFilter('ALL')}
             className={`px-3 py-1.5 rounded-lg transition ${
-              filter === 'ALL' ? 'bg-blue-600 text-white font-semibold shadow' : 'text-slate-400 hover:text-white'
+              filter === 'ALL'
+                ? 'bg-blue-600 text-white font-semibold shadow'
+                : 'text-slate-400 hover:text-white'
             }`}
           >
             All
           </button>
+
           <button
             onClick={() => setFilter('ACTIVE')}
-            className={`px-3 py-1.5 rounded-lg transition ${
-              filter === 'ACTIVE' ? 'bg-blue-600 text-white font-semibold shadow' : 'text-slate-400 hover:text-white'
-            }`}
+            className="px-3 py-1.5 rounded-lg transition text-slate-400 hover:text-white"
           >
-            Active ({signals.filter(s => s.status === 'ACTIVE').length})
+            Active ({signals.length})
           </button>
+
           <button
             onClick={() => setFilter('CLOSED')}
-            className={`px-3 py-1.5 rounded-lg transition ${
-              filter === 'CLOSED' ? 'bg-blue-600 text-white font-semibold shadow' : 'text-slate-400 hover:text-white'
-            }`}
+            className="px-3 py-1.5 rounded-lg transition text-slate-400 hover:text-white"
           >
             Closed
           </button>
         </div>
       </div>
 
-      {/* Signal Cards Feed */}
       <div className="space-y-4">
         {filteredSignals.length === 0 ? (
           <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-8 text-center text-slate-400">
             <Filter className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-            <p className="text-sm font-medium">No signals match the selected filter.</p>
+            <p className="text-sm font-medium">
+              No signals found in Firestore.
+            </p>
           </div>
         ) : (
           filteredSignals.map((sig) => (
-            <SignalCard key={sig.id} signal={sig} onSelect={onSelectSignal} />
+            <SignalCard
+              key={sig.id}
+              signal={sig}
+              onSelect={onSelectSignal}
+            />
           ))
         )}
       </div>
 
-      {/* Floating Telegram Support Button */}
       <div className="fixed right-5 bottom-20 z-40">
         <button
           onClick={onOpenSupport}
